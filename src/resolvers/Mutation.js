@@ -11,7 +11,23 @@ const cookieVariables = {
 
 const Mutations = {
   async createItem(parent, args, ctx, info) {
-    const item = await ctx.db.mutation.createItem({ data: { ...args } }, info);
+    if (!ctx.request.userId) {
+      throw new Error('You must be logged to create a item!');
+    }
+
+    const item = await ctx.db.mutation.createItem(
+      {
+        data: {
+          ...args,
+          user: {
+            connect: {
+              id: ctx.request.userId
+            }
+          }
+        }
+      },
+      info
+    );
 
     return item;
   },
