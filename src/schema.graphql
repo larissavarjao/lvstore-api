@@ -31,6 +31,8 @@ type Mutation {
     confirmPassword: String!
   ): User!
   updatePermissions(permissions: [Permission]!, userId: ID!): User
+  addCartItem(id: ID!): CartItem
+  removeFromCart(id: ID!): CartItem
 }
 
 type Query {
@@ -51,4 +53,5 @@ type User {
   name: String!
   email: String!
   permissions: [Permission!]!
+  cart: [CartItem!]!
 }
