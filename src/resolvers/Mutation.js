@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
+const { isUserLogged } = require('../utils/verifyLogStatus');
 
 const cookieVariables = {
   httpOnly: true,
@@ -11,9 +12,7 @@ const cookieVariables = {
 
 const Mutations = {
   async createItem(parent, args, ctx, info) {
-    if (!ctx.request.userId) {
-      throw new Error('You must be logged to create a item!');
-    }
+    isUserLogged(ctx.request);
 
     const item = await ctx.db.mutation.createItem(
       {
