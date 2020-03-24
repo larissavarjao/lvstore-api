@@ -4,6 +4,7 @@ const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
 const { isUserLogged } = require('../utils/verifyLogStatus');
+const { hasPermission } = require('../utils/hasPermission');
 
 const cookieVariables = {
   httpOnly: true,
@@ -46,7 +47,16 @@ const Mutations = {
   },
   async deleteItem(parent, args, ctx, info) {
     const where = { id: args.id };
-    const item = await ctx.db.query.item({ where }, `{ id title }`);
+    const item = await ctx.db.query.item({ where }, `{ id title user { id }}`);
+
+    const ownsItem = item.user.id === ctx.request.userId;
+    const hasPermissions = ctx.request.user.permissions.some(permission =>
+      ['ADMIN', 'ITEMDELETE'].includes(permission)
+    );
+
+    if (!ownsItem && !hasPermissions) {
+      throw new Error("You don't have permission to perform this action");
+    }
 
     return ctx.db.mutation.deleteItem({ where }, info);
   },
@@ -145,6 +155,28 @@ const Mutations = {
     ctx.response.cookie('token', token, cookieVariables);
 
     return updatedUser;
+  },
+  async updatePermissions(parent, args, ctx, info) {
+    isUserLogged(ctx.request);
+    const currentUser = await ctx.db.query.user(
+      {
+        where: { id: ctx.request.userId }
+      },
+      info
+    );
+    hasPermission(currentUser, ['ADMIN', 'PERMISSIONUPDATE']);
+
+    return ctx.db.mutation.updateUser(
+      {
+        data: {
+          permissions: {
+            set: args.permissions
+          }
+        },
+        where: { id: args.userId }
+      },
+      info
+    );
   }
 };
 
