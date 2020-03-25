@@ -19,6 +19,21 @@ const Query = {
     const user = hasPermission(ctx.request.user, ['ADMIN', 'PERMISSIONUPDATE']);
 
     return ctx.db.query.users({}, info);
+  },
+  async order(parent, args, ctx, info) {
+    isUserLogged(ctx.request);
+
+    const order = await ctx.db.query.order({ where: { id: args.id } }, info);
+    const ownsOrder = order.user.id === ctx.request.userId;
+    const hasPermissionToSeeOrder = ctx.request.user.permissions.includes(
+      'ADMIN'
+    );
+
+    if (!ownsOrder && !hasPermissionToSeeOrder) {
+      throw new Error("You don't have permission to see this.");
+    }
+
+    return order;
   }
 };
 
