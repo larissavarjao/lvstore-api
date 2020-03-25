@@ -29,7 +29,7 @@ Run the command:
 npm run dev
 ```
 
-Using Technologies
+### Using Technologies
 
 - Prisma
 - GraphQL
