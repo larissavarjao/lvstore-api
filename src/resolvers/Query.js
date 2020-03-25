@@ -34,6 +34,12 @@ const Query = {
     }
 
     return order;
+  },
+  async orders(parent, args, ctx, info) {
+    const { userId } = ctx.request;
+    isUserLogged(ctx.request);
+
+    return await ctx.db.query.orders({ where: { user: { id: userId } } }, info);
   }
 };
 
