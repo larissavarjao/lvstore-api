@@ -1,27 +1,28 @@
-const nodeMailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const transport = nodeMailer.createTransport({
-  host: process.env.MAIL_HOST,
-  port: process.env.MAIL_PORT,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS
-  }
-});
+const sendMail = (to, subject, text) => {
+  const msg = {
+    to,
+    from: 'larissasilvavarjao@gmail.com',
+    subject,
+    text,
+    html: `
+    <div className="email" style="
+      border: 1px solid black;
+      padding: 20px;
+      font-family: sans-serif;
+      line-height: 2;
+      font-size: 20px;
+    ">
+      <h2>Hello There!</h2>
+      <p>${text}</p>
+      <p>😘, Larissa Varjão</p>
+    </div>
+  `
+  };
 
-const makeANiceEmail = text => `
-  <div className="email" style="
-    border: 1px solid black;
-    padding: 20px;
-    font-family: sans-serif;
-    line-height: 2;
-    font-size: 20px;
-  ">
-    <h2>Hello There!</h2>
-    <p>${text}</p>
-    <p>😘, Larissa Varjão</p>
-  </div>
-`;
+  sgMail.send(msg).catch(err => console.log({ message }));
+};
 
-exports.transport = transport;
-exports.makeANiceEmail = makeANiceEmail;
+exports.sendMail = sendMail;
