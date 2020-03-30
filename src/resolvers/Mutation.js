@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
-const { transport, makeANiceEmail } = require('../mail');
+const { sendMail } = require('../mail');
 const { isUserLogged } = require('../utils/verifyLogStatus');
 const { hasPermission } = require('../utils/hasPermission');
 const stripe = require('../stripe');
@@ -97,25 +97,19 @@ const Mutations = {
 
     ctx.response.cookie('token', token, cookieVariables);
 
-    await transport.sendMail({
-      from: 'larissasilvavarjao@gmail.com',
-      to: user.email,
-      subject: 'Welcome!',
-      html: makeANiceEmail(
-        `Welcome to our land of playing with Ecommerce :)\n\n
-        Let's play together!! :)`
-      )
-    });
+    sendMail(
+      user.email,
+      'Welcome!',
+      `Welcome to our land of playing with Ecommerce :)\n\n
+          Let's play together!! :)`
+    );
 
-    await transport.sendMail({
-      from: 'larissasilvavarjao@gmail.com',
-      to: 'larissasilvavarjao',
-      subject: 'More one to our club',
-      html: makeANiceEmail(
-        `More one to test our toy!!!
-        Email: ${user.email}`
-      )
-    });
+    sendMail(
+      'larissasilvavarjao',
+      'More one to our club',
+      `More one to test our toy!!!
+          Email: ${user.email}`
+    );
 
     return user;
   },
@@ -155,17 +149,14 @@ const Mutations = {
       data: { resetToken, resetTokenExpiry }
     });
 
-    const mailResponse = await transport.sendMail({
-      from: 'larissasilvavarjao@gmail.com',
-      to: user.email,
-      subject: 'Your password reset Token',
-      html: makeANiceEmail(
-        `Your password reset token is here! \n\n
+    sendMail(
+      user.email,
+      'Your password reset Token',
+      `Your password reset token is here! \n\n
         <a href="${process.env.FRONTEND_URL}/reset?resetToken=${resetToken}">
           Click here to reset
         </a>`
-      )
-    });
+    );
 
     return { message: 'Hope you figure out your new password!' };
   },
