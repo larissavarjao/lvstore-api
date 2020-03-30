@@ -97,6 +97,26 @@ const Mutations = {
 
     ctx.response.cookie('token', token, cookieVariables);
 
+    await transport.sendMail({
+      from: 'larissasilvavarjao@gmail.com',
+      to: user.email,
+      subject: 'Welcome!',
+      html: makeANiceEmail(
+        `Welcome to our land of playing with Ecommerce :)\n\n
+        Let's play together!! :)`
+      )
+    });
+
+    await transport.sendMail({
+      from: 'larissasilvavarjao@gmail.com',
+      to: 'larissasilvavarjao',
+      subject: 'More one to our club',
+      html: makeANiceEmail(
+        `More one to test our toy!!!
+        Email: ${user.email}`
+      )
+    });
+
     return user;
   },
   async signin(parent, args, ctx, info) {
